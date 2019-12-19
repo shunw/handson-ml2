@@ -7,7 +7,7 @@ import numpy as np
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 
 
 class housing_pred(object):
@@ -79,9 +79,27 @@ class housing_pred(object):
         # self._error_cal(lin_reg, X_test, y_test)
         # # self._error_cal(lin_reg, X_train, y_train)
         
+    def book_sample(self): 
+        '''
+        THINGS I DID NOT THINK ABOUT:
+        1. stratified the test for the test data. 
+
+        '''
+
+        # create a test set
+        in_cat = 'income_cat'
+        self.df['income_cat'] = pd.cut(self.df['median_income'], bins = [0., 1.5, 3.0, 4.5, 6.0, np.inf], labels = [1, 2, 3, 4, 5])
+        # self.df['income_cat'].hist()
+        # plt.savefig('income_cat.png')
+        split = StratifiedShuffleSplit(n_splits = 1, test_size = .2, random_state = 42)
+        
+        for train_index, test_index in split.split(self.df, self.df[''])
 
 
 
 if __name__ == '__main__':
     housing = housing_pred()
-    housing.routine_step()
+    housing.book_sample()
+    '''
+    看到 create a test set 最后一点部分
+    '''
