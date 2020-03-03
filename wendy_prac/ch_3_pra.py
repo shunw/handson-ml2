@@ -31,7 +31,18 @@ def plot_roc_curve(fpr, tpr, label = None):
     plt.plot(fpr, tpr, linewidth = 2, label = label)
     plt.plot([0, 1], [0, 1], 'k--')
 
-
+def conf_matrix_accuracy(np_matrix): 
+    '''
+    method: sum up the diagonal data, then divide by the sum of total
+    output: the accuracy of the confusion matrix
+    '''
+    row_n, col_n = np_matrix.shape
+    diag_sum = 0
+    for i in range(col_n): 
+        diag_sum += np_matrix[i, i]
+    # print (diag_sum)
+    # print (np_matrix.sum())
+    return diag_sum/np_matrix.sum()
 
 if __name__ == '__main__': 
 
@@ -40,6 +51,7 @@ if __name__ == '__main__':
     # =================
     startTime = datetime.now()
     LOG_FILENAME = 'logging_ch_3_pra.out'
+    # LOG_FILENAME = 'logging_example.out'
 
     logging.basicConfig(
         filename=LOG_FILENAME,
@@ -93,26 +105,57 @@ if __name__ == '__main__':
     # SVM's parameter check
     # ========================
     try: 
-        
+        # ================================================
+        # with best parameter to fit the whole training set
+        # ================================================
         # knn_clf_new = KNeighborsClassifier(leaf_size=30, metric='minkowski',
         #                 metric_params=None, n_jobs=None, n_neighbors=10, p=1,
         #                 weights='distance')
-        # knn_clf_new.fit(train_set_scaled, train_label)
 
-        # joblib.dump(knn_clf_new, 'knn_new.sav')
-
-        knn_new_saved = joblib.load('knn_new.sav')
+        knn_clf_new_book = KNeighborsClassifier(leaf_size=30, metric='minkowski',
+                        metric_params=None, n_jobs=None, n_neighbors=4, p=2,
+                        weights='distance')
         
-        prediction = knn_new_saved.predict(test_set_scaled)
+        knn_clf_new_book.fit(train_set_scaled, train_label)
 
-        knn_con_matrix = confusion_matrix(prediction, test_label)
+        joblib.dump(knn_clf_new_book, 'knn_new_book.sav')
 
-        joblib.dump(knn_con_matrix, 'knn_con_matrix.pkl')
+        # ================================================
+        # predict with the setting, and store the confusion matrix for further study
+        # ================================================
+        # knn_new_saved = joblib.load('knn_new.sav')
+        
+        prediction = knn_clf_new_book.predict(test_set_scaled)
+
+        knn_book_con_matrix = confusion_matrix(prediction, test_label)
+
+        joblib.dump(knn_book_con_matrix, 'knn_con_bk_matrix.pkl')
+        
+        # # ================================================
+        # check the confusion matrix
+        # ================================================
+        # knn_con_matrix = joblib.load('knn_con_bk_matrix.pkl')
+        # knn_con_matrix_score = conf_matrix_accuracy(knn_con_matrix)
+
+        # row_sums = knn_con_matrix.sum(axis = 1, keepdims = True)
+        # norm_conf_mx = knn_con_matrix/ row_sums
+
+        # np.fill_diagonal(norm_conf_mx, 0)
+
+        # plt.matshow(norm_conf_mx, cmap = plt.cm.gray)
+        # plt.savefig('knn_con_normal.png')
+        
+        # print (tn, fp, fn, tp)
+        # print (knn_con_matrix.sum())
+        # plt.matshow(knn_con_matrix, cmap = plt.cm.gray)
+        # plt.savefig('knn_con_matrix.png')
+
         # with this parameter to check the train set accuracy first
         
         # find ways to adjust the parameter to raise the accuracy for the test set
     except: 
         logging.exception('message')
+        
     # =================
     # logging endding area
     # =================
