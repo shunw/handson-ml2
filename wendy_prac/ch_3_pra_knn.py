@@ -50,8 +50,8 @@ if __name__ == '__main__':
     # logging conf area
     # =================
     startTime = datetime.now()
-    LOG_FILENAME = 'logging_ch_3_pra.out'
-    # LOG_FILENAME = 'logging_example.out'
+    # LOG_FILENAME = 'logging_ch_3_pra.out'
+    LOG_FILENAME = 'logging_example.out'
 
     logging.basicConfig(
         filename=LOG_FILENAME,
@@ -105,38 +105,40 @@ if __name__ == '__main__':
     # SVM's parameter check
     # ========================
     try: 
-        # ================================================
-        # with best parameter to fit the whole training set
-        # ================================================
-        # knn_clf_new = KNeighborsClassifier(leaf_size=30, metric='minkowski',
-        #                 metric_params=None, n_jobs=None, n_neighbors=10, p=1,
-        #                 weights='distance')
-
-        knn_clf_new_book = KNeighborsClassifier(leaf_size=30, metric='minkowski',
-                        metric_params=None, n_jobs=None, n_neighbors=4, p=2,
-                        weights='distance')
-        
-        knn_clf_new_book.fit(train_set_scaled, train_label)
-
-        joblib.dump(knn_clf_new_book, 'knn_new_book.sav')
-
-        # ================================================
-        # predict with the setting, and store the confusion matrix for further study
-        # ================================================
-        # knn_new_saved = joblib.load('knn_new.sav')
-        
-        prediction = knn_clf_new_book.predict(test_set_scaled)
-
-        knn_book_con_matrix = confusion_matrix(prediction, test_label)
-
-        joblib.dump(knn_book_con_matrix, 'knn_con_bk_matrix.pkl')
-        
         # # ================================================
+        # # with best parameter to fit the whole training set
+        # # ================================================
+        # # knn_clf_new = KNeighborsClassifier(leaf_size=30, metric='minkowski',
+        # #                 metric_params=None, n_jobs=None, n_neighbors=10, p=1,
+        # #                 weights='distance')
+
+        # knn_clf_new_book = KNeighborsClassifier(leaf_size=30, metric='minkowski',
+        #                 metric_params=None, n_jobs=None, n_neighbors=4, p=2,
+        #                 weights='distance')
+        
+        # knn_clf_new_book.fit(train_set_scaled, train_label)
+
+        # joblib.dump(knn_clf_new_book, 'knn_new_book.sav')
+
+        # # ================================================
+        # # predict with the setting, and store the confusion matrix for further study
+        # # ================================================
+        # # knn_new_saved = joblib.load('knn_new.sav')
+        
+        # prediction = knn_clf_new_book.predict(test_set_scaled)
+
+
+        # knn_book_con_matrix = confusion_matrix(prediction, test_label)
+
+        # joblib.dump(knn_book_con_matrix, 'knn_con_bk_matrix.pkl')
+        
+        # ================================================
         # check the confusion matrix
         # ================================================
         # knn_con_matrix = joblib.load('knn_con_bk_matrix.pkl')
-        # knn_con_matrix_score = conf_matrix_accuracy(knn_con_matrix)
-
+        knn_con_matrix = joblib.load('knn_con_matrix.pkl')
+        knn_con_matrix_score = conf_matrix_accuracy(knn_con_matrix)
+        # print (knn_con_matrix_score)
         # row_sums = knn_con_matrix.sum(axis = 1, keepdims = True)
         # norm_conf_mx = knn_con_matrix/ row_sums
 
