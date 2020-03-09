@@ -1,4 +1,6 @@
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict
@@ -11,6 +13,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 
 from datetime import datetime
+import glob
 import gzip
 import joblib
 import logging
@@ -21,6 +24,7 @@ import numpy as np
 import os
 import pandas as pd
 import pickle
+import re
 import shutil
 import string
 import tarfile
@@ -110,21 +114,83 @@ def prepare_folder():
 def folder_2_data(): 
     '''
     read each files to database, label the files according to the folder name
+    Only add the context/ subject => three cols in pd: head, context, label
+    labels: easy_ham 1; hard_ham 2; spam 0
     '''
     root_path = 'data/spam/spam_tt'
     train_path = 'spam_train'
     folder = 'easy_ham'
 
-    fl_name = '00001.1a31cc283af0060967a233d26548a6ce'
+    label_dict = {'easy_ham': 1, 'hard_ham': 2, 'spam': 0}
+    
+    fl_name = '0000[1-5]*'
     fl_path = os.path.join(root_path,train_path,folder,fl_name)
-    f = open(fl_path,'r')
-    n = 0
-    for i in f: 
-        print (process_text(i))
-        n += 1
-        if n > 10: 
-            break
-    f.close()
+
+    cont_list = list()
+    subj_list = list()
+
+    for n in glob.glob(fl_path): 
+        
+        f = open(n,'r')
+        
+        cont = ''
+        subject = ''
+        i_start_c = 0
+
+        for i, c in enumerate(f): 
+            # clear_words = process_text(i)
+            # message_bow = CountVectorizer(analyzer = process_text).fit_transform(i)
+            # print (message_bow)
+            
+            if c.strip() == '': 
+                i_start_c += i
+            if i_start_c != 0: 
+                cont += c.strip()
+                
+            if re.findall('^Subject.*', c) and i_start_c == 0: 
+                subject = c.strip()
+                # print (subject)
+                
+        # print (len(cont), len(subject))  
+        
+        f.close()
+
+        cont_list.append(cont)
+        subj_list.append(subject)
+    
+    y_label = label_dict[folder]
+    y_label_ls = [y_label] * len(subj_list)
+    
+    df = pd.DataFrame({'subject': subj_list, 'content': cont_list, 'label': y_label_ls})
+    # messages_bow = CountVectorizer(analyzer = process_text).fit_transform(df['content'])
+    # df['sub&con'] = df['subject'] + df['content']
+    
+    # messages_bow1 = CountVectorizer(analyzer = process_text).fit_transform(df['sub&con'])
+    # print (messages_bow.shape)
+    # print (messages_bow1.shape)
+    return df
+
+class RefineAttributes(BaseEstimator, TransformerMixin): 
+    '''purpose is to make the data easier
+    '''
+    def __init__(self, add_subject = True, lower_case = True): 
+        # before that need to add the string to the pd
+        # make URLs to "URL"
+        # make numbers to "NUMBER"
+        # need to think about if necessage and how to add punctuation
+        
+        self.add_subject = add_subject
+        self.lower_case = lower_case
+    
+    def fit(self, X, y = None): 
+        return self
+    
+
+    def transform(self, X, y = None): 
+        pass
+
+
+
 if __name__ == '__main__': 
 
     # # =================
@@ -155,4 +221,11 @@ if __name__ == '__main__':
     # =================
     # train folder files to data
     # =================
-    folder_2_data()
+    df = folder_2_data() # only have one folder to test about 10 data/ # only have two col, subject col and content col
+    # print (df.shape)
+
+    
+    # # =================
+    # # transform the data col
+    # # =================
+    # refine_data = RefineAttributes()
